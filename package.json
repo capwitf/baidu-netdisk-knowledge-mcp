@@ -1,0 +1,57 @@
+{
+  "name": "baidu-netdisk-knowledge-mcp",
+  "version": "0.1.0",
+  "description": "Baidu Netdisk Knowledge MCP server for AI-readable personal knowledge bases, QR auth, file selection, document parsing, skills, and safe organization plans.",
+  "type": "module",
+  "bin": {
+    "baidu-netdisk-knowledge-mcp": "./dist/cli.js",
+    "baidu-netdisk-mcp": "./dist/cli.js"
+  },
+  "keywords": [
+    "baidu",
+    "baidu-netdisk",
+    "baidu-pan",
+    "mcp",
+    "model-context-protocol",
+    "knowledge-base",
+    "personal-knowledge-management",
+    "ai-files",
+    "document-parser",
+    "百度网盘",
+    "百度网盘mcp",
+    "知识库"
+  ],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "test": "vitest run",
+    "check": "npm run build && npm test"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "mammoth": "^1.12.0",
+    "papaparse": "^5.5.3",
+    "pdf-parse": "^2.4.5",
+    "qrcode": "^1.5.4",
+    "qrcode-terminal": "^0.12.0",
+    "yaml": "^2.9.0",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "@types/papaparse": "^5.5.2",
+    "@types/qrcode": "^1.5.6",
+    "@types/qrcode-terminal": "^0.12.2",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3",
+    "vitest": "^4.0.15"
+  },
+  "engines": {
+    "node": ">=20.11"
+  },
+  "files": [
+    "dist",
+    "assets",
+    "README.md"
+  ],
+  "license": "MIT"
+}
