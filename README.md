@@ -1,12 +1,16 @@
+<p align="left">
+  简体中文 | <a href="./README.en.md">English</a>
+</p>
+
 <p align="center">
-  <img src="assets/icon.png" width="160" alt="Baidu Netdisk Knowledge MCP icon" />
+  <img src="assets/icon.png" width="168" alt="Baidu Netdisk Knowledge MCP icon" />
 </p>
 
 <h1 align="center">Baidu Netdisk Knowledge MCP</h1>
 
 <p align="center">
   <strong>百度网盘知识库 MCP</strong><br />
-  把百度网盘变成 AI 可读取、可分析、可整理的个人知识库。
+  让 AI 读懂你的百度网盘资料，帮你总结、提炼、分类和整理。
 </p>
 
 <p align="center">
@@ -17,43 +21,130 @@
   <img alt="License" src="https://img.shields.io/badge/license-MIT-green" />
 </p>
 
-一个基于 TypeScript 的百度网盘 MCP server。它不是前端网盘客户端，而是给 Codex、Claude Desktop、ChatGPT 等 MCP 客户端使用的工具层：扫码授权后，AI 可以浏览和选择你的百度网盘文件，读取资料内容，运行知识整理 skill，并先生成安全的 dry-run 整理计划。
+---
 
-搜索关键词：`Baidu Netdisk MCP`、`百度网盘 MCP`、`百度网盘知识库`、`Knowledge Base MCP`、`AI 文件整理`。
+很多人的百度网盘里都有一堆资料：PDF、课程讲义、收藏文章、项目文档、电子书、笔记、截图、压缩包。文件越存越多，真正要找、要读、要整理时反而很痛苦。
 
-包名/CLI 名：`baidu-netdisk-knowledge-mcp`。兼容旧命令：`baidu-netdisk-mcp`。
+**Baidu Netdisk Knowledge MCP** 做的事很简单：把百度网盘接到支持 MCP 的 AI 客户端里，让 AI 可以安全地读取你选中的资料，生成摘要、知识点、待办、标签和整理建议。
 
-## 它能做什么
+它适合你，如果你想：
 
-- **扫码授权**：生成百度 OAuth 授权链接、终端二维码和 PNG data URL。
-- **自由选文件**：支持目录浏览、递归列表、搜索结果编号选择、远程路径选择和 `fs_id` 选择。
-- **复用 selectionId**：用 `1,3,5-9` 这类表达式把多个文件保存成一个可复用选择集。
-- **读取资料内容**：下载选中文件到本地 cache，解析 `.txt`、`.md`、`.json`、`.csv`、`.pdf`、`.docx`。
-- **知识库分析**：输出摘要、关键点、问题、待办、标签、建议分类路径和文件价值判断。
-- **自定义 skill**：在 `skills/` 里增加 Markdown/YAML 模板，不用改代码。
-- **安全整理**：整理计划默认 dry-run；真实移动、复制、删除受路径限制和审计日志保护。
+- 让 AI 帮你读百度网盘里的 PDF、文档、笔记和课程资料。
+- 从一堆收藏资料里提炼知识点、问题和行动项。
+- 把网盘资料整理成类似个人知识库的结构。
+- 先看整理计划，再决定要不要移动文件。
+- 给不同资料套不同处理规则，比如课程笔记、论文阅读、书籍总结。
 
-## 当前边界
+## 它不是普通网盘工具
 
-- 没有独立前端页面。交互入口是 MCP 客户端。
-- 不会自动乱移动或删除网盘文件。整理工具只生成计划，执行移动需要你再明确调用对应文件操作工具。
-- 真实百度账号端到端调用需要你自己配置百度开放平台应用和授权。
+这个项目不是“上传下载 API 包装”，也不是一个新的网盘客户端。
+
+它更像一个 **AI 资料助手接口**：
+
+1. 你扫码授权百度网盘。
+2. 你让 AI 搜索或浏览资料。
+3. 你选择一个或多个文件。
+4. AI 读取内容，生成笔记、摘要、分类建议。
+5. 如果要整理文件，先给 dry-run 计划，不会直接乱动。
+
+## 一个典型场景
+
+你可以这样对 AI 说：
+
+> 帮我在百度网盘里找 MCP 相关资料，选最近几份文档，读一下内容，总结成知识笔记，并建议应该放到哪个文件夹。
+
+AI 会通过这个 MCP：
+
+- 搜索百度网盘文件。
+- 返回带编号的文件列表。
+- 根据你的选择生成 `selectionId`。
+- 下载并解析选中文件。
+- 输出结构化笔记和整理建议。
+
+输出可以包含：
+
+```json
+{
+  "title": "MCP 入门资料整理",
+  "category": "AI",
+  "tags": ["MCP", "知识管理"],
+  "summary": "这组资料主要介绍 MCP 的工具调用、上下文协议和客户端集成方式。",
+  "keyPoints": ["MCP 可以让 AI 调用外部工具", "适合做个人资料库入口"],
+  "questions": ["哪些客户端支持 MCP？"],
+  "actionItems": ["整理常用 MCP server 清单"],
+  "suggestedFolder": "/apps/知识库/AI/MCP"
+}
+```
+
+## 核心功能
+
+| 能力 | 说明 |
+| --- | --- |
+| 扫码登录 | 生成百度 OAuth 授权链接、终端二维码和 PNG 二维码 |
+| 自由选择文件 | 支持搜索结果编号、路径、`fs_id`、递归目录和文件类型筛选 |
+| 内容读取 | 支持 `.txt`、`.md`、`.json`、`.csv`、`.pdf`、`.docx` |
+| 长文分块 | 长文件会切成 chunks，避免一次塞爆上下文 |
+| 知识分析 | 摘要、关键点、问题、待办、标签、价值判断、建议目录 |
+| 自定义 skill | 用 Markdown/YAML 写自己的资料处理模板 |
+| 安全整理 | 只先生成 dry-run 计划，真实移动/删除需要你确认 |
+| 审计日志 | 写操作会记录到本地 JSONL 日志 |
+
+## 内置处理模板
+
+项目内置 5 个 skill：
+
+- `knowledge-notes`：把零散资料整理成结构化知识笔记。
+- `course-notes`：整理课程资料、概念、作业和复习线索。
+- `paper-reader`：阅读论文，提取问题、方法、结论和证据。
+- `book-summary`：总结书籍、长文和阅读材料。
+- `cleanup-organizer`：生成清理、归档和分类建议。
+
+你也可以自己加 Markdown/YAML skill，不需要改代码。
+
+## 安全原则
+
+这个项目默认偏保守：
+
+- 不会自动移动或删除你的网盘文件。
+- 整理工具只生成 dry-run 计划。
+- 删除文件必须显式传 `confirm: "DELETE"`。
+- token 默认保存在用户主目录，不写进项目目录。
+- 本地文件访问限制在 `BAIDU_LOCAL_ROOT` 下。
+- 默认只允许在 `/apps/<appName>` 下做写操作。
+
+## 适合谁
+
+- 用百度网盘存学习资料、论文、电子书、项目文档的人。
+- 想把网盘资料变成 AI 可读知识库的人。
+- 想让 Codex、Claude Desktop、ChatGPT 等 MCP 客户端读取网盘资料的人。
+- 想做个人知识管理，但不想手动一个个下载、打开、复制的人。
+
+## 不适合谁
+
+- 想要一个带界面的完整网盘 App。
+- 只需要普通上传、下载、同步功能。
+- 不想配置百度开放平台应用。
+- 不使用支持 MCP 的 AI 客户端。
 
 ## 快速开始
 
+先克隆仓库并安装依赖：
+
 ```bash
+git clone https://github.com/capwitf/baidu-netdisk-knowledge-mcp.git
+cd baidu-netdisk-knowledge-mcp
 npm install
 npm run build
 ```
 
-至少需要准备两个环境变量：
+准备百度开放平台配置：
 
 ```bash
 BAIDU_APP_KEY=你的 AppKey
 BAIDU_SECRET_KEY=你的 SecretKey
 ```
 
-本地 stdio 启动：
+本地启动命令：
 
 ```bash
 node dist/cli.js
@@ -61,35 +152,36 @@ node dist/cli.js
 
 ## MCP 客户端配置
 
-把路径换成你的实际项目路径：
+把路径换成你本机的仓库路径：
 
 ```json
 {
   "mcpServers": {
     "baidu-netdisk-knowledge": {
       "command": "node",
-      "args": ["C:/Users/T/Desktop/workspace/baidu/dist/cli.js"],
+      "args": ["C:/path/to/baidu-netdisk-knowledge-mcp/dist/cli.js"],
       "env": {
         "BAIDU_APP_KEY": "你的 AppKey",
         "BAIDU_SECRET_KEY": "你的 SecretKey",
         "BAIDU_REDIRECT_URI": "oob",
-        "BAIDU_LOCAL_ROOT": "C:/Users/T/Desktop/workspace/baidu"
+        "BAIDU_LOCAL_ROOT": "C:/path/to/baidu-netdisk-knowledge-mcp"
       }
     }
   }
 }
 ```
 
-## 首次授权流程
+## 首次授权
 
-1. 打开 [百度网盘开放平台](https://pan.baidu.com/union/home)，创建应用并记录 `AppKey` / `SecretKey`。
-2. 在 MCP 客户端里调用 `baidu_auth_qrcode`。
-3. 扫码授权后，把回调得到的 `code` 传给 `baidu_auth_exchange_code`。
-4. token 会保存到本地 token store，后续需要时自动刷新。
+1. 打开 [百度网盘开放平台](https://pan.baidu.com/union/home)，创建应用。
+2. 记录应用的 `AppKey` 和 `SecretKey`。
+3. 在 MCP 客户端里调用 `baidu_auth_qrcode`。
+4. 扫码授权后，把回调得到的 `code` 传给 `baidu_auth_exchange_code`。
+5. 后续 token 会自动保存和刷新。
 
 ## 常用工作流
 
-搜索资料并生成编号列表：
+搜索资料：
 
 ```json
 {
@@ -102,7 +194,7 @@ node dist/cli.js
 }
 ```
 
-按编号创建选择集：
+按编号选择文件：
 
 ```json
 {
@@ -114,19 +206,7 @@ node dist/cli.js
 }
 ```
 
-按远程路径或 `fs_id` 创建选择集：
-
-```json
-{
-  "tool": "baidu_select_files",
-  "args": {
-    "paths": ["/apps/知识库/AI/mcp.md"],
-    "fsids": ["9007199254740993"]
-  }
-}
-```
-
-读取、分析、运行 skill：
+读取和分析：
 
 ```json
 { "tool": "baidu_read_selection", "args": { "selectionId": "sel_xxx" } }
@@ -146,11 +226,12 @@ node dist/cli.js
 }
 ```
 
-`baidu_plan_organize_selection` 只返回 dry-run 计划，不移动文件。默认 `BAIDU_STRICT_APP_PATHS=true` 时，`targetRoot` 必须位于 `/apps/<appName>` 下。
+`baidu_plan_organize_selection` 只返回计划，不移动文件。默认 `BAIDU_STRICT_APP_PATHS=true` 时，`targetRoot` 必须位于 `/apps/<appName>` 下。
 
 ## 工具清单
 
-授权：
+<details>
+<summary>授权工具</summary>
 
 - `baidu_auth_status`
 - `baidu_auth_url`
@@ -159,7 +240,10 @@ node dist/cli.js
 - `baidu_auth_exchange_code`
 - `baidu_auth_refresh`
 
-浏览与选择：
+</details>
+
+<details>
+<summary>浏览与选择工具</summary>
 
 - `baidu_quota`
 - `baidu_list_files`
@@ -170,7 +254,10 @@ node dist/cli.js
 - `baidu_select_files`
 - `baidu_file_metas`
 
-知识库：
+</details>
+
+<details>
+<summary>知识库工具</summary>
 
 - `baidu_read_selection`
 - `baidu_analyze_selection`
@@ -178,7 +265,10 @@ node dist/cli.js
 - `baidu_run_skill`
 - `baidu_plan_organize_selection`
 
-文件操作：
+</details>
+
+<details>
+<summary>文件操作工具</summary>
 
 - `baidu_create_folder`
 - `baidu_rename_file`
@@ -189,17 +279,11 @@ node dist/cli.js
 - `baidu_download_file`
 - `baidu_operation_log`
 
-## 内置 Skills
+</details>
 
-项目内置 5 个 skill：
+## 自定义 Skill
 
-- `knowledge-notes`：零散知识整理成结构化笔记。
-- `course-notes`：课程资料提取概念、练习和复习线索。
-- `paper-reader`：论文阅读，提取问题、方法、结论和证据。
-- `book-summary`：书籍/长文总结。
-- `cleanup-organizer`：清理和归档建议。
-
-自定义 skill 可以放到 `BAIDU_SKILLS_DIR` 指向的目录，支持 `.md`、`.markdown`、`.yaml`、`.yml`。
+在 `BAIDU_SKILLS_DIR` 指向的目录里放 `.md`、`.markdown`、`.yaml` 或 `.yml` 文件即可。
 
 Markdown 示例：
 
@@ -214,36 +298,30 @@ outputSchema: knowledge-note
 Extract thesis, evidence, questions, and follow-up tasks.
 ```
 
-用 `baidu_list_skills` 查看可用 skill，用 `baidu_run_skill` 运行。
+然后用：
+
+- `baidu_list_skills` 查看可用 skill
+- `baidu_run_skill` 运行指定 skill
 
 ## 配置项
 
-`.env.example` 包含常用配置：
+`.env.example` 里列出了常用配置：
 
 | 变量 | 说明 | 默认值 |
 | --- | --- | --- |
-| `BAIDU_APP_KEY` | 百度开放平台 AppKey | 无，必填 |
-| `BAIDU_SECRET_KEY` | 百度开放平台 SecretKey | 无，必填 |
+| `BAIDU_APP_KEY` | 百度开放平台 AppKey | 必填 |
+| `BAIDU_SECRET_KEY` | 百度开放平台 SecretKey | 必填 |
 | `BAIDU_REDIRECT_URI` | OAuth 回调地址 | `oob` |
 | `BAIDU_SCOPE` | OAuth scope | `basic,netdisk` |
 | `BAIDU_TOKEN_STORE` | token 文件 | `~/.baidu-netdisk-mcp/tokens.json` |
 | `BAIDU_OPERATION_LOG` | 写操作审计日志 | `~/.baidu-netdisk-mcp/operations.jsonl` |
 | `BAIDU_SELECTION_STORE` | selectionId 存储 | `~/.baidu-netdisk-mcp/selections.json` |
-| `BAIDU_CACHE_ROOT` | 读取资料时的本地 cache | `~/.baidu-netdisk-mcp/cache` |
+| `BAIDU_CACHE_ROOT` | 本地 cache | `~/.baidu-netdisk-mcp/cache` |
 | `BAIDU_SKILLS_DIR` | 自定义 skill 目录 | `~/.baidu-netdisk-mcp/skills` |
-| `BAIDU_LOCAL_ROOT` | 本地上传/下载允许访问的根目录 | 启动目录 |
+| `BAIDU_LOCAL_ROOT` | 本地文件访问根目录 | 启动目录 |
 | `BAIDU_STRICT_APP_PATHS` | 写操作限制到 `/apps/<appName>` | `true` |
 | `BAIDU_UPLOAD_CHUNK_SIZE_BYTES` | 上传分片大小 | `4194304` |
 | `BAIDU_TRANSFER_MAX_RETRIES` | 上传/下载重试次数 | `3` |
-
-## 安全设计
-
-- token 默认写入用户主目录，不写入项目目录。
-- 读取资料会先下载到 cache，不修改原始网盘文件。
-- 写操作支持 `dryRun`，建议先看计划再执行。
-- `baidu_plan_organize_selection` 永远只生成计划。
-- `baidu_delete_file` 必须传 `confirm: "DELETE"`。
-- 创建文件夹、重命名、复制、移动、删除会写入 JSONL 审计日志。
 
 ## 开发
 
@@ -252,6 +330,10 @@ npm run check
 ```
 
 这个命令会先运行 TypeScript 编译，再运行 Vitest 测试。
+
+## 相关关键词
+
+`Baidu Netdisk MCP`、`百度网盘 MCP`、`百度网盘知识库`、`AI 知识库`、`MCP server`、`个人知识管理`、`AI 文件整理`、`Knowledge Base MCP`
 
 ## 参考资料
 
